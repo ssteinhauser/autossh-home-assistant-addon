@@ -1,0 +1,24 @@
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - run: |
+          upstream=$(gh api repos/${{ github.repository }} --jq '.parent.full_name')
+          git remote add upstream https://github.com/$upstream.git
+          git fetch upstream
+          git merge upstream/master --no-edit
+          git push
